@@ -1,1 +1,41 @@
 # comicvine-search
+
+A simple library to interact with the `search` resource of the [ComicVine API](https://comicvine.gamespot.com/api/).
+
+Currently requires **Python 3.6**, as well as the [requests](http://docs.python-requests.org/en/master/) and [requests-cache](https://github.com/reclosedev/requests-cache) packages.
+
+
+## Usage
+
+```python
+from comicvine_search.client import ComicVineClient
+
+# You must first register an account in order to obtain an API key.
+#   https://comicvine.gamespot.com/api/
+cv = ComicVineClient('your-comicvine-api-key')
+
+# Perform a search using the default options.
+results = cv.search('transmetropolitan')
+
+# Paginated results are supported using the 'offset' and 'limit' parameters.
+results = cv.search('transmetropolitan', limit=5, offset=15)
+
+# Optionally, the type of resources to return in the results can be specified.
+results = cv.search('transmetropolitan', resources=['issue', 'volume'])
+```
+
+The `search` function returns the JSON results returned by the API. The resulting JSON will have the following structure:
+
+```json
+{
+    "status_code": 1,
+    "error": "OK",
+    "number_of_total_results": 152,
+    "number_of_page_results": 10,
+    "limit": 10,
+    "offset": 0,
+    "results": [{}, ...]
+}
+```
+
+For more information, see the [API list of resources](https://comicvine.gamespot.com/api/documentation).
