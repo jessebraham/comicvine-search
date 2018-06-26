@@ -24,18 +24,20 @@ results = cv.search('transmetropolitan', limit=5, offset=15)
 results = cv.search('transmetropolitan', resources=['issue', 'volume'])
 ```
 
-The `search` function returns the JSON results returned by the API. The resulting JSON will have the following structure:
+The `search` function returns a `Response` object containing the JSON results returned by the API. This `Response` object has the following properties accessible:
 
-```json
-{
-    "status_code": 1,
-    "error": "OK",
-    "number_of_total_results": 152,
-    "number_of_page_results": 10,
-    "limit": 10,
-    "offset": 0,
-    "results": [{}, ...]
-}
-```
+- status_code
+- error
+- number_of_total_results
+- number_of_page_results
+- limit
+- offset
+- results
 
-For more information, see the [API list of resources](https://comicvine.gamespot.com/api/documentation).
+More information can be found in the [API list of resources](https://comicvine.gamespot.com/api/documentation).
+
+
+## To Do
+
+- [ ] Create a `Response` object and parse results into it; return this rather than JSON.
+- [ ] Convert `Client` class methods to "private" methods where appropriate.

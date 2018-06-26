@@ -12,6 +12,7 @@ import requests_cache
 from .exceptions import (
     ComicVineApiError, ComicVineUnauthorizedError, ComicVineForbiddenError
 )
+from .response import Response
 
 
 class ComicVineClient(object):
@@ -73,7 +74,10 @@ class ComicVineClient(object):
         '''
         Perform a search against the API, using the provided query term. If
         required, a list of resource types to filter search results to can
-        be included. Return the JSON contained in the response.
+        be included.
+        
+        Take the JSON contained in the response and provide it to the custom
+        ``Response`` object's constructor. Return the ``Response`` object.
 
         :param query: The search query with which to make the request.
         :type  query: str
@@ -86,14 +90,17 @@ class ComicVineClient(object):
         :param use_cache: Toggle the use of requests_cache.
         :type  use_cache: bool
 
-        :return: The JSON contained in the HTTP response following the search.
-        :rtype:  dict
+        :return: The response object containing the results of the search
+                 query.
+        :rtype:  comicvine_search.response.Response
         '''
 
         params = self.request_params(query, offset, limit, resources)
-        response = self.query_api(params, use_cache=use_cache)
+        r = self.query_api(params, use_cache=use_cache)
 
-        return response.json()
+        response = Response(r.json())
+
+        return response
 
     def request_params(self, query, offset, limit, resources):
         '''
