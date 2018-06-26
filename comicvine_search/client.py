@@ -48,9 +48,9 @@ class ComicVineClient(object):
         '''
 
         self.api_key = api_key
-        self.install_requests_cache(expire_after)
+        self._install_requests_cache(expire_after)
 
-    def install_requests_cache(self, expire_after):
+    def _install_requests_cache(self, expire_after):
         '''
         Monkey patch Requests to use requests_cache.CachedSession rather than
         requests.Session. Responses will have the `from_cache` attribute set
@@ -75,7 +75,7 @@ class ComicVineClient(object):
         Perform a search against the API, using the provided query term. If
         required, a list of resource types to filter search results to can
         be included.
-        
+
         Take the JSON contained in the response and provide it to the custom
         ``Response`` object's constructor. Return the ``Response`` object.
 
@@ -95,14 +95,14 @@ class ComicVineClient(object):
         :rtype:  comicvine_search.response.Response
         '''
 
-        params = self.request_params(query, offset, limit, resources)
-        r = self.query_api(params, use_cache=use_cache)
+        params = self._request_params(query, offset, limit, resources)
+        r = self._query_api(params, use_cache=use_cache)
 
         response = Response(r.json())
 
         return response
 
-    def request_params(self, query, offset, limit, resources):
+    def _request_params(self, query, offset, limit, resources):
         '''
         Construct a dict containing the required key-value pairs of parameters
         required in order to make the API request.
@@ -133,9 +133,9 @@ class ComicVineClient(object):
                 'limit':     min(10, limit),
                 'offset':    max(0, offset),
                 'query':     query,
-                'resources': self.validate_resources(resources)}
+                'resources': self._validate_resources(resources)}
 
-    def validate_resources(self, resources):
+    def _validate_resources(self, resources):
         '''
         Provided a list of resources, first convert it to a set and perform an
         intersection with the set of valid resource types, ``RESOURCE_TYPES``.
@@ -155,7 +155,7 @@ class ComicVineClient(object):
         valid_resources = self.RESOURCE_TYPES & set(resources)
         return ','.join(valid_resources) if valid_resources else None
 
-    def query_api(self, params, use_cache):
+    def _query_api(self, params, use_cache):
         '''
         Query the ComicVine API's ``search`` resource, providing the required
         headers and parameters with the request. Optionally allow the caller
@@ -178,7 +178,7 @@ class ComicVineClient(object):
                 self.API_URL, headers=self.HEADERS, params=params)
 
             if not response.ok:
-                self.handle_http_error(response)
+                self._handle_http_error(response)
 
             return response
 
@@ -190,7 +190,7 @@ class ComicVineClient(object):
 
         return __httpget()
 
-    def handle_http_error(self, response):
+    def _handle_http_error(self, response):
         '''
         Given a response to an HTTP request, represented by a
         ``requests.Response`` object, if the response's status code is
