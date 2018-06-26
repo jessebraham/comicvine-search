@@ -96,9 +96,9 @@ class ComicVineClient(object):
         '''
 
         params = self._request_params(query, offset, limit, resources)
-        r = self._query_api(params, use_cache=use_cache)
+        json = self._query_api(params, use_cache=use_cache)
 
-        response = Response(r.json())
+        response = Response(json)
 
         return response
 
@@ -130,8 +130,8 @@ class ComicVineClient(object):
 
         return {'api_key':   self.api_key,
                 'format':    'json',
-                'limit':     min(10, limit),
-                'offset':    max(0, offset),
+                'limit':     min(10, limit),  # hard limit of 10
+                'offset':    max(0, offset),  # cannot provide negative offset
                 'query':     query,
                 'resources': self._validate_resources(resources)}
 
@@ -159,15 +159,18 @@ class ComicVineClient(object):
         '''
         Query the ComicVine API's ``search`` resource, providing the required
         headers and parameters with the request. Optionally allow the caller
-        of the function to specify *not* to use the request cache.
+        of the function to disable the request cache.
+
+        If an error occurs during the request, handle it accordingly. Upon
+        success, return the JSON from the response.
 
         :param params: Parameters to include with the request.
         :type  params: dict
         :param use_cache: Toggle the use of requests_cache.
         :type  use_cache: bool
 
-        :return: The requests.Response object returned by the HTTP request.
-        :rtype:  requests.Response
+        :return: The JSON contained in the response.
+        :rtype:  dict
         '''
 
         # Since we're performing the identical action regardless of whether
@@ -180,10 +183,10 @@ class ComicVineClient(object):
             if not response.ok:
                 self._handle_http_error(response)
 
-            return response
+            return response.json()
 
-        # To disable the use of the request cache, we simply must make our
-        # HTTP requests from within the `requests_cache.disabled` context.
+        # To disable the use of the request cache, make the HTTP request from
+        # within the `requests_cache.disabled()` context.
         if not use_cache:
             with requests_cache.disabled():
                 return __httpget()
@@ -192,8 +195,7 @@ class ComicVineClient(object):
 
     def _handle_http_error(self, response):
         '''
-        Given a response to an HTTP request, represented by a
-        ``requests.Response`` object, if the response's status code is
+        Provided a ``requests.Response`` object, if the status code is
         anything other than **200**, we will treat it as an error.
 
         Using the response's status code, determine which type of exception to
